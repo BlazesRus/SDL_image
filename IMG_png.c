@@ -576,6 +576,7 @@ static int IMG_SavePNG_RW_libpng(SDL_Surface *surface, SDL_RWops *dst, int freed
                     transparent_table[i] = palette->colors[i].a;
                 }
                 lib.png_set_tRNS(png_ptr, info_ptr, transparent_table, last_transparent + 1, NULL);
+                // MK 2022/01/17: unresolved external symbol: png_set_tRNS(png_ptr, info_ptr, transparent_table, last_transparent + 1, NULL);
             }
         }
         else if (surface->format->format == SDL_PIXELFORMAT_RGB24) {
