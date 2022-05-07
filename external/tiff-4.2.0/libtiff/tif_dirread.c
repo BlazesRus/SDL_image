@@ -3795,50 +3795,7 @@ TIFFReadDirectory(TIFF* tif)
 		MissingRequired(tif,"ImageLength");
 		goto bad;
 	}
-	/*
-	 * Setup appropriate structures (by strip or by tile)
-	 */
-	if (!TIFFFieldSet(tif, FIELD_TILEDIMENSIONS)) {
-		tif->tif_dir.td_nstrips = TIFFNumberOfStrips(tif);  
-		tif->tif_dir.td_tilewidth = tif->tif_dir.td_imagewidth;
-		tif->tif_dir.td_tilelength = tif->tif_dir.td_rowsperstrip;
-		tif->tif_dir.td_tiledepth = tif->tif_dir.td_imagedepth;
-		tif->tif_flags &= ~TIFF_ISTILED;
-	} else {
-		tif->tif_dir.td_nstrips = TIFFNumberOfTiles(tif);
-		tif->tif_flags |= TIFF_ISTILED;
-	}
-	if (!tif->tif_dir.td_nstrips) {
-		TIFFErrorExt(tif->tif_clientdata, module,
-		    "Cannot handle zero number of %s",
-		    isTiled(tif) ? "tiles" : "strips");
-		goto bad;
-	}
-	tif->tif_dir.td_stripsperimage = tif->tif_dir.td_nstrips;
-	if (tif->tif_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
-		tif->tif_dir.td_stripsperimage /= tif->tif_dir.td_samplesperpixel;
-	if (!TIFFFieldSet(tif, FIELD_STRIPOFFSETS)) {
-#ifdef OJPEG_SUPPORT
-		if ((tif->tif_dir.td_compression==COMPRESSION_OJPEG) &&
-		    (isTiled(tif)==0) &&
-		    (tif->tif_dir.td_nstrips==1)) {
-			/*
-			 * XXX: OJPEG hack.
-			 * If a) compression is OJPEG, b) it's not a tiled TIFF,
-			 * and c) the number of strips is 1,
-			 * then we tolerate the absence of stripoffsets tag,
-			 * because, presumably, all required data is in the
-			 * JpegInterchangeFormat stream.
-			 */
-			TIFFSetFieldBit(tif, FIELD_STRIPOFFSETS);
-		} else
-#endif
-        {
-			MissingRequired(tif,
-				isTiled(tif) ? "TileOffsets" : "StripOffsets");
-			goto bad;
-		}
-	}
+
 	/*
 	 * Second pass: extract other information.
 	 */
@@ -4043,41 +4000,6 @@ TIFFReadDirectory(TIFF* tif)
 			} /* -- if (!dp->tdir_ignore) */
 		} /* -- for-loop -- */
 
-        if( tif->tif_mode == O_RDWR &&
-            tif->tif_dir.td_stripoffset_entry.tdir_tag != 0 &&
-            tif->tif_dir.td_stripoffset_entry.tdir_count == 0 &&
-            tif->tif_dir.td_stripoffset_entry.tdir_type == 0 &&
-            tif->tif_dir.td_stripoffset_entry.tdir_offset.toff_long8 == 0 &&
-            tif->tif_dir.td_stripbytecount_entry.tdir_tag != 0 &&
-            tif->tif_dir.td_stripbytecount_entry.tdir_count == 0 &&
-            tif->tif_dir.td_stripbytecount_entry.tdir_type == 0 &&
-            tif->tif_dir.td_stripbytecount_entry.tdir_offset.toff_long8 == 0 )
-        {
-            /* Directory typically created with TIFFDeferStrileArrayWriting() */
-            TIFFSetupStrips(tif);
-        }
-        else if( !(tif->tif_flags&TIFF_DEFERSTRILELOAD) )
-        {
-            if( tif->tif_dir.td_stripoffset_entry.tdir_tag != 0 )
-            {
-                if (!TIFFFetchStripThing(tif,&(tif->tif_dir.td_stripoffset_entry),
-                                         tif->tif_dir.td_nstrips,
-                                         &tif->tif_dir.td_stripoffset_p))
-                {
-                    goto bad;
-                }
-            }
-            if( tif->tif_dir.td_stripbytecount_entry.tdir_tag != 0 )
-            {
-                if (!TIFFFetchStripThing(tif,&(tif->tif_dir.td_stripbytecount_entry),
-                                         tif->tif_dir.td_nstrips,
-                                         &tif->tif_dir.td_stripbytecount_p))
-                {
-                    goto bad;
-                }
-            }
-        }
-
 	/*
 	 * OJPEG hack:
 	 * - If a) compression is OJPEG, and b) photometric tag is missing,
@@ -4149,6 +4071,88 @@ TIFFReadDirectory(TIFF* tif)
 	}
 
 	/*
+	 * Setup appropriate structures (by strip or by tile)
+	 * We do that only after the above OJPEG hack which alters SamplesPerPixel
+	 * and thus influences the number of strips in the separate planarconfig.
+	 */
+	if (!TIFFFieldSet(tif, FIELD_TILEDIMENSIONS)) {
+		tif->tif_dir.td_nstrips = TIFFNumberOfStrips(tif);  
+		tif->tif_dir.td_tilewidth = tif->tif_dir.td_imagewidth;
+		tif->tif_dir.td_tilelength = tif->tif_dir.td_rowsperstrip;
+		tif->tif_dir.td_tiledepth = tif->tif_dir.td_imagedepth;
+		tif->tif_flags &= ~TIFF_ISTILED;
+	} else {
+		tif->tif_dir.td_nstrips = TIFFNumberOfTiles(tif);
+		tif->tif_flags |= TIFF_ISTILED;
+	}
+	if (!tif->tif_dir.td_nstrips) {
+		TIFFErrorExt(tif->tif_clientdata, module,
+		    "Cannot handle zero number of %s",
+		    isTiled(tif) ? "tiles" : "strips");
+		goto bad;
+	}
+	tif->tif_dir.td_stripsperimage = tif->tif_dir.td_nstrips;
+	if (tif->tif_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+		tif->tif_dir.td_stripsperimage /= tif->tif_dir.td_samplesperpixel;
+	if (!TIFFFieldSet(tif, FIELD_STRIPOFFSETS)) {
+#ifdef OJPEG_SUPPORT
+		if ((tif->tif_dir.td_compression==COMPRESSION_OJPEG) &&
+		    (isTiled(tif)==0) &&
+		    (tif->tif_dir.td_nstrips==1)) {
+			/*
+			 * XXX: OJPEG hack.
+			 * If a) compression is OJPEG, b) it's not a tiled TIFF,
+			 * and c) the number of strips is 1,
+			 * then we tolerate the absence of stripoffsets tag,
+			 * because, presumably, all required data is in the
+			 * JpegInterchangeFormat stream.
+			 */
+			TIFFSetFieldBit(tif, FIELD_STRIPOFFSETS);
+		} else
+#endif
+        {
+			MissingRequired(tif,
+				isTiled(tif) ? "TileOffsets" : "StripOffsets");
+			goto bad;
+		}
+	}
+
+        if( tif->tif_mode == O_RDWR &&
+            tif->tif_dir.td_stripoffset_entry.tdir_tag != 0 &&
+            tif->tif_dir.td_stripoffset_entry.tdir_count == 0 &&
+            tif->tif_dir.td_stripoffset_entry.tdir_type == 0 &&
+            tif->tif_dir.td_stripoffset_entry.tdir_offset.toff_long8 == 0 &&
+            tif->tif_dir.td_stripbytecount_entry.tdir_tag != 0 &&
+            tif->tif_dir.td_stripbytecount_entry.tdir_count == 0 &&
+            tif->tif_dir.td_stripbytecount_entry.tdir_type == 0 &&
+            tif->tif_dir.td_stripbytecount_entry.tdir_offset.toff_long8 == 0 )
+        {
+            /* Directory typically created with TIFFDeferStrileArrayWriting() */
+            TIFFSetupStrips(tif);
+        }
+        else if( !(tif->tif_flags&TIFF_DEFERSTRILELOAD) )
+        {
+            if( tif->tif_dir.td_stripoffset_entry.tdir_tag != 0 )
+            {
+                if (!TIFFFetchStripThing(tif,&(tif->tif_dir.td_stripoffset_entry),
+                                         tif->tif_dir.td_nstrips,
+                                         &tif->tif_dir.td_stripoffset_p))
+                {
+                    goto bad;
+                }
+            }
+            if( tif->tif_dir.td_stripbytecount_entry.tdir_tag != 0 )
+            {
+                if (!TIFFFetchStripThing(tif,&(tif->tif_dir.td_stripbytecount_entry),
+                                         tif->tif_dir.td_nstrips,
+                                         &tif->tif_dir.td_stripbytecount_p))
+                {
+                    goto bad;
+                }
+            }
+        }
+
+	/*
 	 * Make sure all non-color channels are extrasamples.
 	 * If it's not the case, define them as such.
 	 */
@@ -4173,7 +4177,8 @@ TIFFReadDirectory(TIFF* tif)
                     goto bad;
                 }
 
-                memcpy(new_sampleinfo, tif->tif_dir.td_sampleinfo, old_extrasamples * sizeof(uint16));
+                if (old_extrasamples > 0)
+                    memcpy(new_sampleinfo, tif->tif_dir.td_sampleinfo, old_extrasamples * sizeof(uint16));
                 _TIFFsetShortArray(&tif->tif_dir.td_sampleinfo, new_sampleinfo, tif->tif_dir.td_extrasamples);
                 _TIFFfree(new_sampleinfo);
         }
@@ -5079,7 +5084,8 @@ TIFFFetchNormalTag(TIFF* tif, TIFFDirEntry* dp, int recover)
 								_TIFFfree(data);
 							return(0);
 						}
-						_TIFFmemcpy(o,data,(uint32)dp->tdir_count);
+						if (dp->tdir_count > 0 )
+						    _TIFFmemcpy(o,data,(uint32)dp->tdir_count);
 						o[(uint32)dp->tdir_count]=0;
 						if (data!=0)
 							_TIFFfree(data);
@@ -5765,7 +5771,8 @@ TIFFFetchStripThing(TIFF* tif, TIFFDirEntry* dir, uint32 nstrips, uint64** lpp)
 			_TIFFfree(data);
 			return(0);
 		}
-                _TIFFmemcpy(resizeddata,data,(uint32)dir->tdir_count*sizeof(uint64));
+                if (dir->tdir_count)
+                    _TIFFmemcpy(resizeddata,data,(uint32)dir->tdir_count*sizeof(uint64));
                 _TIFFmemset(resizeddata+(uint32)dir->tdir_count,0,(nstrips-(uint32)dir->tdir_count)*sizeof(uint64));
 		_TIFFfree(data);
 		data=resizeddata;
