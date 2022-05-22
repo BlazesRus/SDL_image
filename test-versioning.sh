@@ -8,6 +8,7 @@ ref_major=$(sed -ne 's/^#define SDL_IMAGE_MAJOR_VERSION  *//p' SDL_image.h)
 ref_minor=$(sed -ne 's/^#define SDL_IMAGE_MINOR_VERSION  *//p' SDL_image.h)
 ref_micro=$(sed -ne 's/^#define SDL_IMAGE_PATCHLEVEL  *//p' SDL_image.h)
 ref_version="${ref_major}.${ref_minor}.${ref_micro}"
+ref_sdl_req=$(sed -ne 's/^SDL_VERSION=//p' configure.ac)
 
 tests=0
 failed=0
@@ -37,12 +38,18 @@ fi
 major=$(sed -ne 's/^set(MAJOR_VERSION \([0-9]\+\))$/\1/p' CMakeLists.txt)
 minor=$(sed -ne 's/^set(MINOR_VERSION \([0-9]\+\))$/\1/p' CMakeLists.txt)
 micro=$(sed -ne 's/^set(MICRO_VERSION \([0-9]\+\))$/\1/p' CMakeLists.txt)
-version="${major}.${minor}.${micro}"
+sdl_req=$(sed -ne 's/^set(SDL_REQUIRED_VERSION \([0-9.]\+\))$/\1/p' CMakeLists.txt)
 
 if [ "$ref_version" = "$version" ]; then
     ok "CMakeLists.txt $version"
 else
     not_ok "CMakeLists.txt $version disagrees with SDL_image.h $ref_version"
+fi
+
+if [ "$ref_sdl_req" = "$sdl_req" ]; then
+    ok "CMakeLists.txt $sdl_req"
+else
+    not_ok "CMakeLists.txt SDL_REQUIRED_VERSION=$sdl_req disagrees with configure.ac SDL_VERSION=$ref_sdl_req"
 fi
 
 major=$(sed -ne 's/^MAJOR_VERSION *= *//p' Makefile.os2)
@@ -56,39 +63,41 @@ else
     not_ok "Makefile.os2 $version disagrees with SDL_image.h $ref_version"
 fi
 
-tuple=$(sed -ne 's/^ *FILEVERSION *//p' VisualC/Version.rc | tr -d '\r')
-ref_tuple="${ref_major},${ref_minor},${ref_micro},0"
+for rcfile in version.rc VisualC/Version.rc; do
+    tuple=$(sed -ne 's/^ *FILEVERSION *//p' "$rcfile" | tr -d '\r')
+    ref_tuple="${ref_major},${ref_minor},${ref_micro},0"
 
-if [ "$ref_tuple" = "$tuple" ]; then
-    ok "Version.rc FILEVERSION $tuple"
-else
-    not_ok "Version.rc FILEVERSION $tuple disagrees with SDL_image.h $ref_tuple"
-fi
+    if [ "$ref_tuple" = "$tuple" ]; then
+        ok "$rcfile FILEVERSION $tuple"
+    else
+        not_ok "$rcfile FILEVERSION $tuple disagrees with SDL_image.h $ref_tuple"
+    fi
 
-tuple=$(sed -ne 's/^ *PRODUCTVERSION *//p' VisualC/Version.rc | tr -d '\r')
+    tuple=$(sed -ne 's/^ *PRODUCTVERSION *//p' "$rcfile" | tr -d '\r')
 
-if [ "$ref_tuple" = "$tuple" ]; then
-    ok "Version.rc PRODUCTVERSION $tuple"
-else
-    not_ok "Version.rc PRODUCTVERSION $tuple disagrees with SDL_image.h $ref_tuple"
-fi
+    if [ "$ref_tuple" = "$tuple" ]; then
+        ok "$rcfile PRODUCTVERSION $tuple"
+    else
+        not_ok "$rcfile PRODUCTVERSION $tuple disagrees with SDL_image.h $ref_tuple"
+    fi
 
-tuple=$(sed -Ene 's/^ *VALUE "FileVersion", "([0-9, ]+)\\0"\r?$/\1/p' VisualC/Version.rc | tr -d '\r')
-ref_tuple="${ref_major}, ${ref_minor}, ${ref_micro}, 0"
+    tuple=$(sed -Ene 's/^ *VALUE "FileVersion", "([0-9, ]+)\\0"\r?$/\1/p' "$rcfile" | tr -d '\r')
+    ref_tuple="${ref_major}, ${ref_minor}, ${ref_micro}, 0"
 
-if [ "$ref_tuple" = "$tuple" ]; then
-    ok "Version.rc FileVersion $tuple"
-else
-    not_ok "Version.rc FileVersion $tuple disagrees with SDL_image.h $ref_tuple"
-fi
+    if [ "$ref_tuple" = "$tuple" ]; then
+        ok "$rcfile FileVersion $tuple"
+    else
+        not_ok "$rcfile FileVersion $tuple disagrees with SDL_image.h $ref_tuple"
+    fi
 
-tuple=$(sed -Ene 's/^ *VALUE "ProductVersion", "([0-9, ]+)\\0"\r?$/\1/p' VisualC/Version.rc | tr -d '\r')
+    tuple=$(sed -Ene 's/^ *VALUE "ProductVersion", "([0-9, ]+)\\0"\r?$/\1/p' "$rcfile" | tr -d '\r')
 
-if [ "$ref_tuple" = "$tuple" ]; then
-    ok "Version.rc ProductVersion $tuple"
-else
-    not_ok "Version.rc ProductVersion $tuple disagrees with SDL_image.h $ref_tuple"
-fi
+    if [ "$ref_tuple" = "$tuple" ]; then
+        ok "$rcfile ProductVersion $tuple"
+    else
+        not_ok "$rcfile ProductVersion $tuple disagrees with SDL_image.h $ref_tuple"
+    fi
+done
 
 version=$(sed -Ene '/CFBundleShortVersionString/,+1 s/.*<string>(.*)<\/string>.*/\1/p' Xcode/Info-Framework.plist)
 
@@ -115,6 +124,15 @@ if [ "$ref" = "$dylib_compat" ]; then
     ok "project.pbxproj DYLIB_COMPATIBILITY_VERSION is consistent"
 else
     not_ok "project.pbxproj DYLIB_COMPATIBILITY_VERSION is inconsistent"
+fi
+
+dylib_compat=$(sed -ne 's/^set(DYLIB_COMPATIBILITY_VERSION "\([0-9.]\+\)")$/\1/p' CMakeLists.txt)
+ref='3.0.0'
+
+if [ "$ref" = "$dylib_compat" ]; then
+    ok "CMakeLists.txt DYLIB_COMPATIBILITY_VERSION is consistent"
+else
+    not_ok "CMakeLists.txt DYLIB_COMPATIBILITY_VERSION is inconsistent"
 fi
 
 dylib_cur=$(sed -Ene 's/.*DYLIB_CURRENT_VERSION = (.*);$/\1/p' Xcode/SDL_image.xcodeproj/project.pbxproj)

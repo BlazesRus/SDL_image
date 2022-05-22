@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     Uint32 flags;
     int i, w, h;
     int done = 0;
+    int quit = 0;
     SDL_Event event;
     const char *saveFile = NULL;
 
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
         }
 
         if ( SDL_strcmp(argv[i], "-quit") == 0 ) {
-            done = 1;
+            quit = 1;
             continue;
         }
 
@@ -133,31 +134,32 @@ int main(int argc, char *argv[])
         SDL_SetWindowSize(window, w, h);
         SDL_ShowWindow(window);
 
-        while ( ! done ) {
+        done = quit;
+        while ( !done ) {
             while ( SDL_PollEvent(&event) ) {
                 switch (event.type) {
                     case SDL_KEYUP:
                         switch (event.key.keysym.sym) {
-                            case SDLK_LEFT:
-                                if ( i > 1 ) {
-                                    i -= 2;
-                                    done = 1;
-                                }
-                                break;
-                            case SDLK_RIGHT:
-                                if ( argv[i+1] ) {
-                                    done = 1;
-                                }
-                                break;
-                            case SDLK_ESCAPE:
-                            case SDLK_q:
-                                argv[i+1] = NULL;
-                            /* Drop through to done */
-                            case SDLK_SPACE:
-                            case SDLK_TAB:
+                        case SDLK_LEFT:
+                            if ( i > 1 ) {
+                                i -= 2;
+                                done = 1;
+                            }
+                            break;
+                        case SDLK_RIGHT:
+                            if ( argv[i+1] ) {
+                                done = 1;
+                            }
+                            break;
+                        case SDLK_ESCAPE:
+                        case SDLK_q:
+                            argv[i+1] = NULL;
+                        /* Drop through to done */
+                        case SDLK_SPACE:
+                        case SDLK_TAB:
                             done = 1;
                             break;
-                            default:
+                        default:
                             break;
                         }
                         break;

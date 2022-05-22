@@ -13,15 +13,18 @@ endif
 
 libSDL2_image_la_SOURCES =	\
 	IMG.c			\
+	IMG_avif.c		\
 	IMG_bmp.c		\
 	IMG_gif.c		\
 	IMG_jpg.c		\
+	IMG_jxl.c		\
 	IMG_lbm.c		\
 	IMG_pcx.c		\
 	IMG_png.c		\
 	IMG_pnm.c		\
 	IMG_qoi.c		\
 	IMG_svg.c		\
+	IMG_stb.c		\
 	IMG_tga.c		\
 	IMG_tif.c		\
 	IMG_xcf.c		\
@@ -33,21 +36,30 @@ libSDL2_image_la_SOURCES =	\
 	miniz.h			\
 	nanosvg.h		\
 	nanosvgrast.h		\
-	qoi.h
+	qoi.h			\
+	stb_image.h		\
+	tiny_jpeg.h
 
-EXTRA_DIST = CHANGES.txt LICENSE.txt README.txt README-emscripten.txt \
-	IMG_xxx.c		\
-	IMG_ImageIO.m		\
-	IMG_UIImage.m		\
+EXTRA_DIST = \
+	.gitmodules		\
 	Android.mk		\
+	CHANGES.txt 		\
+	CMakeLists.txt		\
+	cmake			\
+	SDL2_imageConfig.cmake.in \
+	IMG_ImageIO.m		\
+	IMG_xxx.c		\
+	LICENSE.txt 		\
 	Makefile.os2		\
+	README-emscripten.txt 	\
+	README.txt 		\
+	SDL2_image.spec		\
 	VisualC			\
 	VisualC-WinRT		\
-	version.rc		\
 	Xcode			\
+	autogen.sh		\
 	external		\
-	SDL2_image.spec		\
-	autogen.sh gcc-fat.sh
+	version.rc
 
 
 libSDL2_image_la_LDFLAGS = 	\
@@ -70,6 +82,12 @@ noinst_PROGRAMS = showimage showanim
 showimage_LDADD = libSDL2_image.la
 showanim_LDADD = libSDL2_image.la
 
+SUBDIRS = .
+
+if BUILD_TESTS
+SUBDIRS += test
+endif
+
 # Rule to build tar-gzipped distribution package
 $(PACKAGE)-$(VERSION).tar.gz: distcheck
 
@@ -77,3 +95,5 @@ $(PACKAGE)-$(VERSION).tar.gz: distcheck
 rpm: $(PACKAGE)-$(VERSION).tar.gz
 	rpmbuild -ta $(PACKAGE)-$(VERSION).tar.gz
 
+dist-hook:
+	ls $(distdir)/external | fgrep -v download.sh | while read dir; do rm -rf "$(distdir)/external/$$dir"; done

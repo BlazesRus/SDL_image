@@ -47,6 +47,12 @@
 		AADBAC89175C6B4C004F8ED2 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 007288A60F0DA79800C302A9 /* ApplicationServices.framework */; platformFilters = (macos, ); };
 		AADBAC8A175C6B4F004F8ED2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61F85449145A19BC002CA294 /* Foundation.framework */; };
 		BE1FA71A07AF4C44004B6283 /* SDL_image.h in Headers */ = {isa = PBXBuildFile; fileRef = 1014BAEA010A4B677F000001 /* SDL_image.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F31094C3282AE42D008EF641 /* IMG_stb.c in Sources */ = {isa = PBXBuildFile; fileRef = F31094C2282AE42D008EF641 /* IMG_stb.c */; };
+		F31094C4282AE42D008EF641 /* IMG_stb.c in Sources */ = {isa = PBXBuildFile; fileRef = F31094C2282AE42D008EF641 /* IMG_stb.c */; };
+		F354743E2828CA66007E9EDA /* IMG_jxl.c in Sources */ = {isa = PBXBuildFile; fileRef = F354743B2828CA66007E9EDA /* IMG_jxl.c */; };
+		F354743F2828CA66007E9EDA /* IMG_jxl.c in Sources */ = {isa = PBXBuildFile; fileRef = F354743B2828CA66007E9EDA /* IMG_jxl.c */; };
+		F35475FD2829BAF9007E9EDA /* IMG_avif.c in Sources */ = {isa = PBXBuildFile; fileRef = F35475FC2829BAF9007E9EDA /* IMG_avif.c */; };
+		F35475FE2829BAF9007E9EDA /* IMG_avif.c in Sources */ = {isa = PBXBuildFile; fileRef = F35475FC2829BAF9007E9EDA /* IMG_avif.c */; };
 		F3D87C04281DF8FC005DA540 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3D87C03281DF8FC005DA540 /* SDL2.framework */; };
 		F3E1AAEB281CBABD00740E39 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E1AAEA281CBABD00740E39 /* CoreGraphics.framework */; platformFilters = (ios, tvos, ); };
 		F3E1AAEC281CBB1F00740E39 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E1AAE8281CBA7B00740E39 /* ImageIO.framework */; platformFilters = (ios, tvos, ); };
@@ -61,6 +67,41 @@
 			proxyType = 1;
 			remoteGlobalIDString = BE1FA71807AF4C44004B6283;
 			remoteInfo = Framework;
+		};
+		F307EFAC2828C8FA003915D7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F307EFA82828C8FA003915D7 /* jxl.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F307EEDC28288CCF003915D7;
+			remoteInfo = jxl;
+		};
+		F35475DB2829BA80007E9EDA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F35475D42829BA80007E9EDA /* avif.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F35474682829A8B3007E9EDA;
+			remoteInfo = avif;
+		};
+		F35475DD2829BA80007E9EDA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F35475D42829BA80007E9EDA /* avif.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F354757D2829B82B007E9EDA;
+			remoteInfo = dav1d;
+		};
+		F35475DF2829BA80007E9EDA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F35475D42829BA80007E9EDA /* avif.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F354758A2829B839007E9EDA;
+			remoteInfo = "dav1d-8bit";
+		};
+		F35475E12829BA80007E9EDA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F35475D42829BA80007E9EDA /* avif.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F35475972829B847007E9EDA;
+			remoteInfo = "dav1d-16bit";
 		};
 		F3D87D23281EA9D8005DA540 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -110,6 +151,12 @@
 		BE1FA72E07AF4C45004B6283 /* SDL2_image.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SDL2_image.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE1FA74107AF4C45004B6283 /* libSDL2_image.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDL2_image.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE1FA74507AF4C45004B6283 /* Create DMG */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Create DMG"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F307EFA82828C8FA003915D7 /* jxl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = jxl.xcodeproj; path = jxl/jxl.xcodeproj; sourceTree = "<group>"; };
+		F31094C2282AE42D008EF641 /* IMG_stb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = IMG_stb.c; path = ../IMG_stb.c; sourceTree = "<group>"; };
+		F354743B2828CA66007E9EDA /* IMG_jxl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = IMG_jxl.c; path = ../IMG_jxl.c; sourceTree = "<group>"; };
+		F35475D42829BA80007E9EDA /* avif.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = avif.xcodeproj; path = avif/avif.xcodeproj; sourceTree = "<group>"; };
+		F35475FC2829BAF9007E9EDA /* IMG_avif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = IMG_avif.c; path = ../IMG_avif.c; sourceTree = "<group>"; };
+		F3547625282AE1C6007E9EDA /* config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = config.xcconfig; sourceTree = "<group>"; };
 		F3D87C03281DF8FC005DA540 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = macOS/SDL2.framework; sourceTree = "<group>"; };
 		F3D87D15281EA88F005DA540 /* webp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = webp.xcodeproj; path = webp/webp.xcodeproj; sourceTree = "<group>"; };
 		F3E1AAE8281CBA7B00740E39 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
@@ -169,6 +216,9 @@
 		0867D691FE84028FC02AAC07 /* SDL_imageFramework */ = {
 			isa = PBXGroup;
 			children = (
+				F3547625282AE1C6007E9EDA /* config.xcconfig */,
+				F35475D42829BA80007E9EDA /* avif.xcodeproj */,
+				F307EFA82828C8FA003915D7 /* jxl.xcodeproj */,
 				F3D87D15281EA88F005DA540 /* webp.xcodeproj */,
 				F59C70FC00D5CB5801000001 /* pkg-support */,
 				0153844A006D81B07F000001 /* Public Headers */,
@@ -192,14 +242,17 @@
 			children = (
 				AA579DF1161C07E6005F809B /* IMG.c */,
 				AA579DE4161C07E6005F809B /* IMG_ImageIO.m */,
+				F35475FC2829BAF9007E9EDA /* IMG_avif.c */,
 				AA579DE2161C07E6005F809B /* IMG_bmp.c */,
 				AA579DE3161C07E6005F809B /* IMG_gif.c */,
 				AA579DE5161C07E6005F809B /* IMG_jpg.c */,
+				F354743B2828CA66007E9EDA /* IMG_jxl.c */,
 				AA579DE6161C07E6005F809B /* IMG_lbm.c */,
 				AA579DE7161C07E6005F809B /* IMG_pcx.c */,
 				AA579DE8161C07E6005F809B /* IMG_png.c */,
 				AA579DE9161C07E6005F809B /* IMG_pnm.c */,
 				6313BF522785566D00F268AD /* IMG_qoi.c */,
+				F31094C2282AE42D008EF641 /* IMG_stb.c */,
 				AA50AA461F9C7C50003B9C0C /* IMG_svg.c */,
 				AA579DEA161C07E6005F809B /* IMG_tga.c */,
 				AA579DEB161C07E6005F809B /* IMG_tif.c */,
@@ -232,6 +285,25 @@
 				BE1FA76007AF72B1004B6283 /* Linked Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F307EFA92828C8FA003915D7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F307EFAD2828C8FA003915D7 /* jxl.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F35475D52829BA80007E9EDA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F35475DC2829BA80007E9EDA /* avif.framework */,
+				F35475DE2829BA80007E9EDA /* libdav1d.a */,
+				F35475E02829BA80007E9EDA /* libdav1d-8bit.a */,
+				F35475E22829BA80007E9EDA /* libdav1d-16bit.a */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		F3D87D16281EA88F005DA540 /* Products */ = {
@@ -363,6 +435,14 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = F35475D52829BA80007E9EDA /* Products */;
+					ProjectRef = F35475D42829BA80007E9EDA /* avif.xcodeproj */;
+				},
+				{
+					ProductGroup = F307EFA92828C8FA003915D7 /* Products */;
+					ProjectRef = F307EFA82828C8FA003915D7 /* jxl.xcodeproj */;
+				},
+				{
 					ProductGroup = F3D87D16281EA88F005DA540 /* Products */;
 					ProjectRef = F3D87D15281EA88F005DA540 /* webp.xcodeproj */;
 				},
@@ -377,6 +457,41 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		F307EFAD2828C8FA003915D7 /* jxl.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = jxl.framework;
+			remoteRef = F307EFAC2828C8FA003915D7 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F35475DC2829BA80007E9EDA /* avif.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = avif.framework;
+			remoteRef = F35475DB2829BA80007E9EDA /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F35475DE2829BA80007E9EDA /* libdav1d.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libdav1d.a;
+			remoteRef = F35475DD2829BA80007E9EDA /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F35475E02829BA80007E9EDA /* libdav1d-8bit.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libdav1d-8bit.a";
+			remoteRef = F35475DF2829BA80007E9EDA /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F35475E22829BA80007E9EDA /* libdav1d-16bit.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libdav1d-16bit.a";
+			remoteRef = F35475E12829BA80007E9EDA /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		F3D87D24281EA9D8005DA540 /* webp.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -453,14 +568,17 @@
 				AA579DFE161C07E7005F809B /* IMG_png.c in Sources */,
 				AA579E00161C07E7005F809B /* IMG_pnm.c in Sources */,
 				AA579E02161C07E7005F809B /* IMG_tga.c in Sources */,
+				F35475FD2829BAF9007E9EDA /* IMG_avif.c in Sources */,
 				AA579E04161C07E7005F809B /* IMG_tif.c in Sources */,
 				AA579E06161C07E7005F809B /* IMG_webp.c in Sources */,
 				AA579E08161C07E7005F809B /* IMG_xcf.c in Sources */,
 				AA579E0A161C07E7005F809B /* IMG_xpm.c in Sources */,
+				F354743E2828CA66007E9EDA /* IMG_jxl.c in Sources */,
 				AA579E0C161C07E7005F809B /* IMG_xv.c in Sources */,
 				AA579E0E161C07E7005F809B /* IMG_xxx.c in Sources */,
 				AA579E10161C07E7005F809B /* IMG.c in Sources */,
 				AA50AA471F9C7C50003B9C0C /* IMG_svg.c in Sources */,
+				F31094C3282AE42D008EF641 /* IMG_stb.c in Sources */,
 				6313BF532785566D00F268AD /* IMG_qoi.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -478,14 +596,17 @@
 				AA579DFF161C07E7005F809B /* IMG_png.c in Sources */,
 				AA579E01161C07E7005F809B /* IMG_pnm.c in Sources */,
 				AA579E03161C07E7005F809B /* IMG_tga.c in Sources */,
+				F35475FE2829BAF9007E9EDA /* IMG_avif.c in Sources */,
 				AA579E05161C07E7005F809B /* IMG_tif.c in Sources */,
 				AA579E07161C07E7005F809B /* IMG_webp.c in Sources */,
 				AA579E09161C07E7005F809B /* IMG_xcf.c in Sources */,
 				AA579E0B161C07E7005F809B /* IMG_xpm.c in Sources */,
+				F354743F2828CA66007E9EDA /* IMG_jxl.c in Sources */,
 				AA579E0D161C07E7005F809B /* IMG_xv.c in Sources */,
 				AA579E0F161C07E7005F809B /* IMG_xxx.c in Sources */,
 				AA579E11161C07E7005F809B /* IMG.c in Sources */,
 				AA23FC7D20A2A1B90017DFB9 /* IMG_svg.c in Sources */,
+				F31094C4282AE42D008EF641 /* IMG_stb.c in Sources */,
 				6313BF542785566D00F268AD /* IMG_qoi.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -503,6 +624,7 @@
 /* Begin XCBuildConfiguration section */
 		007288110F0DA5BA00C302A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F3547625282AE1C6007E9EDA /* config.xcconfig */;
 			buildSettings = {
 				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				COPY_PHASE_STRIP = NO;
@@ -513,6 +635,7 @@
 				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/$(PLATFORM)\"";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					USE_STBIMAGE,
 					LOAD_BMP,
 					LOAD_GIF,
 					LOAD_JPG,
@@ -524,12 +647,15 @@
 					LOAD_SVG,
 					LOAD_TGA,
 					LOAD_TIF,
-					LOAD_WEBP,
 					LOAD_XPM,
 					LOAD_XV,
+					"$(CONFIG_PREPROCESSOR_DEFINITIONS)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/$(PLATFORM)/SDL2.framework/Headers\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/$(PLATFORM)/SDL2.framework/Headers\"",
+					"\"$(SRCROOT)/../external/jpeg\"",
+				);
 				INFOPLIST_FILE = "Info-Framework.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -537,7 +663,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PLATFORM = "";
 				"PLATFORM[sdk=appletvos*]" = tvOS;
@@ -554,10 +680,7 @@
 		007288120F0DA5BA00C302A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				OTHER_LDFLAGS = (
-					"-weak_framework",
-					webp,
-				);
+				OTHER_LDFLAGS = "$(CONFIG_FRAMEWORK_LDFLAGS)";
 			};
 			name = Debug;
 		};
@@ -590,6 +713,7 @@
 		};
 		007288150F0DA5C400C302A9 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F3547625282AE1C6007E9EDA /* config.xcconfig */;
 			buildSettings = {
 				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
@@ -599,6 +723,7 @@
 				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/$(PLATFORM)\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					USE_STBIMAGE,
 					LOAD_BMP,
 					LOAD_GIF,
 					LOAD_JPG,
@@ -610,12 +735,15 @@
 					LOAD_SVG,
 					LOAD_TGA,
 					LOAD_TIF,
-					LOAD_WEBP,
 					LOAD_XPM,
 					LOAD_XV,
+					"$(CONFIG_PREPROCESSOR_DEFINITIONS)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/$(PLATFORM)/SDL2.framework/Headers\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/$(PLATFORM)/SDL2.framework/Headers\"",
+					"\"$(SRCROOT)/../external/jpeg\"",
+				);
 				INFOPLIST_FILE = "Info-Framework.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -623,7 +751,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PLATFORM = "";
 				"PLATFORM[sdk=appletvos*]" = tvOS;
 				"PLATFORM[sdk=iphoneos*]" = iOS;
@@ -639,10 +767,7 @@
 		007288160F0DA5C400C302A9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				OTHER_LDFLAGS = (
-					"-weak_framework",
-					webp,
-				);
+				OTHER_LDFLAGS = "$(CONFIG_FRAMEWORK_LDFLAGS)";
 			};
 			name = Release;
 		};

@@ -775,6 +775,10 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+INSTALL_TESTS_FALSE
+INSTALL_TESTS_TRUE
+BUILD_TESTS_FALSE
+BUILD_TESTS_TRUE
 PC_REQUIRES
 PC_LIBS
 IMG_LIBS
@@ -784,8 +788,12 @@ LIBTIFF_LIBS
 LIBTIFF_CFLAGS
 LIBPNG_LIBS
 LIBPNG_CFLAGS
+LIBJXL_LIBS
+LIBJXL_CFLAGS
 LIBJPEG_LIBS
 LIBJPEG_CFLAGS
+LIBAVIF_LIBS
+LIBAVIF_CFLAGS
 SDL2_CONFIG
 SDL_LIBS
 SDL_CFLAGS
@@ -939,14 +947,21 @@ enable_libtool_lock
 enable_dependency_tracking
 enable_silent_rules
 enable_imageio
+enable_stb_image
+enable_avif
+enable_avif_shared
 enable_bmp
 enable_gif
 enable_jpg
 enable_jpg_shared
+enable_save_jpg
+enable_jxl
+enable_jxl_shared
 enable_lbm
 enable_pcx
 enable_png
 enable_png_shared
+enable_save_png
 enable_pnm
 enable_svg
 enable_tga
@@ -959,6 +974,8 @@ enable_webp
 enable_webpdec
 enable_webp_shared
 enable_qoi
+enable_tests
+enable_installed_tests
 with_sdl_prefix
 with_sdl_exec_prefix
 enable_sdltest
@@ -979,8 +996,12 @@ PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
 SDL_CFLAGS
 SDL_LIBS
+LIBAVIF_CFLAGS
+LIBAVIF_LIBS
 LIBJPEG_CFLAGS
 LIBJPEG_LIBS
+LIBJXL_CFLAGS
+LIBJXL_LIBS
 LIBPNG_CFLAGS
 LIBPNG_LIBS
 LIBTIFF_CFLAGS
@@ -1618,14 +1639,22 @@ Optional Features:
   --disable-silent-rules  verbose build output (undo: "make V=0")
   --enable-imageio        use native Mac OS X frameworks for loading images
                           [default=yes]
+  --enable-stb-image      use stb_image for loading JPG and PNG images
+                          [default=yes]
+  --enable-avif           support loading AVIF images [default=yes]
+  --enable-avif-shared    dynamically load AVIF support [default=yes]
   --enable-bmp            support loading BMP/ICO/CUR images [default=yes]
   --enable-gif            support loading GIF images [default=yes]
   --enable-jpg            support loading JPG images [default=yes]
   --enable-jpg-shared     dynamically load JPG support [default=yes]
+  --enable-save-jpg       support saving JPG images [default=yes]
+  --enable-jxl            support loading JXL images [default=yes]
+  --enable-jxl-shared     dynamically load JXL support [default=yes]
   --enable-lbm            support loading LBM images [default=yes]
   --enable-pcx            support loading PCX images [default=yes]
   --enable-png            support loading PNG images [default=yes]
   --enable-png-shared     dynamically load PNG support [default=yes]
+  --enable-save-png       support saving PNG images [default=yes]
   --enable-pnm            support loading PNM images [default=yes]
   --enable-svg            support loading SVG images [default=yes]
   --enable-tga            support loading TGA images [default=yes]
@@ -1639,6 +1668,9 @@ Optional Features:
                           instead of libwebp [default=no]
   --enable-webp-shared    dynamically load WEBP support [default=yes]
   --enable-qoi            support loading QOI images [default=yes]
+  --enable-tests          build tests [default=no]
+  --enable-installed-tests
+                          install tests [default=no]
   --disable-sdltest       Do not try to compile and run a test SDL program
 
 Optional Packages:
@@ -1668,10 +1700,17 @@ Some influential environment variables:
               path overriding pkg-config's built-in search path
   SDL_CFLAGS  C compiler flags for SDL, overriding pkg-config
   SDL_LIBS    linker flags for SDL, overriding pkg-config
+  LIBAVIF_CFLAGS
+              C compiler flags for LIBAVIF, overriding pkg-config
+  LIBAVIF_LIBS
+              linker flags for LIBAVIF, overriding pkg-config
   LIBJPEG_CFLAGS
               C compiler flags for LIBJPEG, overriding pkg-config
   LIBJPEG_LIBS
               linker flags for LIBJPEG, overriding pkg-config
+  LIBJXL_CFLAGS
+              C compiler flags for LIBJXL, overriding pkg-config
+  LIBJXL_LIBS linker flags for LIBJXL, overriding pkg-config
   LIBPNG_CFLAGS
               C compiler flags for LIBPNG, overriding pkg-config
   LIBPNG_LIBS linker flags for LIBPNG, overriding pkg-config
@@ -4085,13 +4124,13 @@ if ${lt_cv_nm_interface+:} false; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4088: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4127: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4091: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4130: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4094: output\"" >&5)
+  (eval echo "\"\$as_me:4133: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5305,7 +5344,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5308 "configure"' > conftest.$ac_ext
+  echo '#line 5347 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7130,11 +7169,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7133: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7172: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7137: \$? = $ac_status" >&5
+   echo "$as_me:7176: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7479,11 +7518,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7482: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7521: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7486: \$? = $ac_status" >&5
+   echo "$as_me:7525: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7584,11 +7623,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7587: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7626: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7591: \$? = $ac_status" >&5
+   echo "$as_me:7630: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7639,11 +7678,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7642: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7681: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7646: \$? = $ac_status" >&5
+   echo "$as_me:7685: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10074,7 +10113,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10077 "configure"
+#line 10116 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10170,7 +10209,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10173 "configure"
+#line 10212 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12772,6 +12811,27 @@ $as_echo "$have_gcc_fvisibility" >&6; }
     fi
 }
 
+# Check whether --enable-stb_image was given.
+if test "${enable_stb_image+set}" = set; then :
+  enableval=$enable_stb_image;
+else
+  enable_stb_image=yes
+fi
+
+# Check whether --enable-avif was given.
+if test "${enable_avif+set}" = set; then :
+  enableval=$enable_avif;
+else
+  enable_avif=yes
+fi
+
+# Check whether --enable-avif-shared was given.
+if test "${enable_avif_shared+set}" = set; then :
+  enableval=$enable_avif_shared;
+else
+  enable_avif_shared=yes
+fi
+
 # Check whether --enable-bmp was given.
 if test "${enable_bmp+set}" = set; then :
   enableval=$enable_bmp;
@@ -12800,6 +12860,27 @@ else
   enable_jpg_shared=yes
 fi
 
+# Check whether --enable-save-jpg was given.
+if test "${enable_save_jpg+set}" = set; then :
+  enableval=$enable_save_jpg;
+else
+  enable_save_jpg=yes
+fi
+
+# Check whether --enable-jxl was given.
+if test "${enable_jxl+set}" = set; then :
+  enableval=$enable_jxl;
+else
+  enable_jxl=yes
+fi
+
+# Check whether --enable-jxl-shared was given.
+if test "${enable_jxl_shared+set}" = set; then :
+  enableval=$enable_jxl_shared;
+else
+  enable_jxl_shared=yes
+fi
+
 # Check whether --enable-lbm was given.
 if test "${enable_lbm+set}" = set; then :
   enableval=$enable_lbm;
@@ -12826,6 +12907,13 @@ if test "${enable_png_shared+set}" = set; then :
   enableval=$enable_png_shared;
 else
   enable_png_shared=yes
+fi
+
+# Check whether --enable-save-png was given.
+if test "${enable_save_png+set}" = set; then :
+  enableval=$enable_save_png;
+else
+  enable_save_png=yes
 fi
 
 # Check whether --enable-pnm was given.
@@ -12910,6 +12998,20 @@ if test "${enable_qoi+set}" = set; then :
   enableval=$enable_qoi;
 else
   enable_qoi=yes
+fi
+
+# Check whether --enable-tests was given.
+if test "${enable_tests+set}" = set; then :
+  enableval=$enable_tests;
+else
+  enable_tests=no
+fi
+
+# Check whether --enable-installed-tests was given.
+if test "${enable_installed_tests+set}" = set; then :
+  enableval=$enable_installed_tests;
+else
+  enable_installed_tests=no
 fi
 
 
@@ -13237,7 +13339,227 @@ rm -f core conftest.err conftest.$ac_objext \
 CFLAGS="$CFLAGS $SDL_CFLAGS"
 LIBS="$LIBS $SDL_LIBS"
 
-if (test x$enable_jpg = xyes || test x$enable_tif = xyes) && test x$enable_imageio != xyes; then
+if test x$enable_stb_image = xyes; then
+    $as_echo "#define USE_STBIMAGE 1" >>confdefs.h
+
+fi
+if test x$enable_avif = xyes; then
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libavif" >&5
+$as_echo_n "checking for libavif... " >&6; }
+
+if test -n "$LIBAVIF_CFLAGS"; then
+    pkg_cv_LIBAVIF_CFLAGS="$LIBAVIF_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libavif\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libavif") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBAVIF_CFLAGS=`$PKG_CONFIG --cflags "libavif" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBAVIF_LIBS"; then
+    pkg_cv_LIBAVIF_LIBS="$LIBAVIF_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libavif\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libavif") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBAVIF_LIBS=`$PKG_CONFIG --libs "libavif" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LIBAVIF_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libavif" 2>&1`
+        else
+	        LIBAVIF_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libavif" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LIBAVIF_PKG_ERRORS" >&5
+
+	        ac_fn_c_check_header_mongrel "$LINENO" "avif/avif.h" "ac_cv_header_avif_avif_h" "$ac_includes_default"
+if test "x$ac_cv_header_avif_avif_h" = xyes; then :
+
+            have_avif_hdr=yes
+            LIBAVIF_CFLAGS=""
+
+fi
+
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for avifVersion in -lavif" >&5
+$as_echo_n "checking for avifVersion in -lavif... " >&6; }
+if ${ac_cv_lib_avif_avifVersion+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lavif  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char avifVersion ();
+int
+main ()
+{
+return avifVersion ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_avif_avifVersion=yes
+else
+  ac_cv_lib_avif_avifVersion=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_avif_avifVersion" >&5
+$as_echo "$ac_cv_lib_avif_avifVersion" >&6; }
+if test "x$ac_cv_lib_avif_avifVersion" = xyes; then :
+
+            have_avif_lib=yes
+            LIBAVIF_LIBS="-lavif"
+
+fi
+
+
+elif test $pkg_failed = untried; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	        ac_fn_c_check_header_mongrel "$LINENO" "avif/avif.h" "ac_cv_header_avif_avif_h" "$ac_includes_default"
+if test "x$ac_cv_header_avif_avif_h" = xyes; then :
+
+            have_avif_hdr=yes
+            LIBAVIF_CFLAGS=""
+
+fi
+
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for avifVersion in -lavif" >&5
+$as_echo_n "checking for avifVersion in -lavif... " >&6; }
+if ${ac_cv_lib_avif_avifVersion+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lavif  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char avifVersion ();
+int
+main ()
+{
+return avifVersion ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_avif_avifVersion=yes
+else
+  ac_cv_lib_avif_avifVersion=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_avif_avifVersion" >&5
+$as_echo "$ac_cv_lib_avif_avifVersion" >&6; }
+if test "x$ac_cv_lib_avif_avifVersion" = xyes; then :
+
+            have_avif_lib=yes
+            LIBAVIF_LIBS="-lavif"
+
+fi
+
+
+else
+	LIBAVIF_CFLAGS=$pkg_cv_LIBAVIF_CFLAGS
+	LIBAVIF_LIBS=$pkg_cv_LIBAVIF_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	        have_avif_hdr=yes
+        have_avif_lib=yes
+        have_avif_pc=yes
+
+fi
+    if test x$have_avif_hdr = xyes -a x$have_avif_lib = xyes; then
+        if test x$enable_avif = xyes; then
+            $as_echo "#define LOAD_AVIF 1" >>confdefs.h
+
+        fi
+
+        case "$host" in
+            *-*-darwin*)
+                avif_lib=`find_lib libavif.dylib`
+                ;;
+            *-*-cygwin* | *-*-mingw*)
+                avif_lib=`find_lib "libavif*.dll"`
+                ;;
+            *)
+                avif_lib=`find_lib "libavif[0-9]*.so.*"`
+                if test x$avif_lib = x; then
+                    avif_lib=`find_lib "libavif.so.*"`
+                fi
+                ;;
+        esac
+    elif test x$enable_avif = xyes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *** Unable to find AVIF library (https://github.com/AOMediaCodec/libavif)" >&5
+$as_echo "$as_me: WARNING: *** Unable to find AVIF library (https://github.com/AOMediaCodec/libavif)" >&2;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: AVIF image loading disabled" >&5
+$as_echo "$as_me: WARNING: AVIF image loading disabled" >&2;}
+    fi
+fi
+
+if test x$enable_jpg = xyes; then
+    if test x$enable_stb_image = xyes; then
+        $as_echo "#define LOAD_JPG 1" >>confdefs.h
+
+    elif test x$enable_imageio = xyes; then
+        $as_echo "#define LOAD_JPG 1" >>confdefs.h
+
+        $as_echo "#define JPG_USES_IMAGEIO 1" >>confdefs.h
+
+    else
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libjpeg" >&5
@@ -13297,16 +13619,16 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$LIBJPEG_PKG_ERRORS" >&5
 
-	        ac_fn_c_check_header_mongrel "$LINENO" "jpeglib.h" "ac_cv_header_jpeglib_h" "$ac_includes_default"
+	            ac_fn_c_check_header_mongrel "$LINENO" "jpeglib.h" "ac_cv_header_jpeglib_h" "$ac_includes_default"
 if test "x$ac_cv_header_jpeglib_h" = xyes; then :
 
-            have_jpg_hdr=yes
-            LIBJPEG_CFLAGS=""
+                have_jpg_hdr=yes
+                LIBJPEG_CFLAGS=""
 
 fi
 
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jpeg_CreateDecompress in -ljpeg" >&5
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jpeg_CreateDecompress in -ljpeg" >&5
 $as_echo_n "checking for jpeg_CreateDecompress in -ljpeg... " >&6; }
 if ${ac_cv_lib_jpeg_jpeg_CreateDecompress+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -13344,8 +13666,8 @@ fi
 $as_echo "$ac_cv_lib_jpeg_jpeg_CreateDecompress" >&6; }
 if test "x$ac_cv_lib_jpeg_jpeg_CreateDecompress" = xyes; then :
 
-            have_jpg_lib=yes
-            LIBJPEG_LIBS="-ljpeg"
+                have_jpg_lib=yes
+                LIBJPEG_LIBS="-ljpeg"
 
 fi
 
@@ -13353,16 +13675,16 @@ fi
 elif test $pkg_failed = untried; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	        ac_fn_c_check_header_mongrel "$LINENO" "jpeglib.h" "ac_cv_header_jpeglib_h" "$ac_includes_default"
+	            ac_fn_c_check_header_mongrel "$LINENO" "jpeglib.h" "ac_cv_header_jpeglib_h" "$ac_includes_default"
 if test "x$ac_cv_header_jpeglib_h" = xyes; then :
 
-            have_jpg_hdr=yes
-            LIBJPEG_CFLAGS=""
+                have_jpg_hdr=yes
+                LIBJPEG_CFLAGS=""
 
 fi
 
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jpeg_CreateDecompress in -ljpeg" >&5
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jpeg_CreateDecompress in -ljpeg" >&5
 $as_echo_n "checking for jpeg_CreateDecompress in -ljpeg... " >&6; }
 if ${ac_cv_lib_jpeg_jpeg_CreateDecompress+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -13400,8 +13722,8 @@ fi
 $as_echo "$ac_cv_lib_jpeg_jpeg_CreateDecompress" >&6; }
 if test "x$ac_cv_lib_jpeg_jpeg_CreateDecompress" = xyes; then :
 
-            have_jpg_lib=yes
-            LIBJPEG_LIBS="-ljpeg"
+                have_jpg_lib=yes
+                LIBJPEG_LIBS="-ljpeg"
 
 fi
 
@@ -13411,40 +13733,257 @@ else
 	LIBJPEG_LIBS=$pkg_cv_LIBJPEG_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	        have_jpg_hdr=yes
-        have_jpg_lib=yes
-        have_jpg_pc=yes
+	            have_jpg_hdr=yes
+            have_jpg_lib=yes
+            have_jpg_pc=yes
 
 fi
-    if test x$have_jpg_hdr = xyes -a x$have_jpg_lib = xyes; then
-        if test x$enable_jpg = xyes; then
-            $as_echo "#define LOAD_JPG 1" >>confdefs.h
+        if test x$have_jpg_hdr = xyes -a x$have_jpg_lib = xyes; then
+            if test x$enable_jpg = xyes; then
+                $as_echo "#define LOAD_JPG 1" >>confdefs.h
+
+            fi
+
+            case "$host" in
+                *-*-darwin*)
+                    jpg_lib=`find_lib libjpeg.dylib`
+                    ;;
+                *-*-cygwin* | *-*-mingw*)
+                    jpg_lib=`find_lib "libjpeg*.dll"`
+                    ;;
+                *)
+                    jpg_lib=`find_lib "libjpeg[0-9]*.so.*"`
+                    if test x$jpg_lib = x; then
+                        jpg_lib=`find_lib "libjpeg.so.*"`
+                    fi
+                    ;;
+            esac
+        else
+            { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *** Unable to find JPEG library (http://www.ijg.org/)" >&5
+$as_echo "$as_me: WARNING: *** Unable to find JPEG library (http://www.ijg.org/)" >&2;}
+            { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: JPG image loading disabled" >&5
+$as_echo "$as_me: WARNING: JPG image loading disabled" >&2;}
+        fi
+    fi
+fi
+
+if test x$enable_jxl = xyes; then
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libjxl" >&5
+$as_echo_n "checking for libjxl... " >&6; }
+
+if test -n "$LIBJXL_CFLAGS"; then
+    pkg_cv_LIBJXL_CFLAGS="$LIBJXL_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libjxl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libjxl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBJXL_CFLAGS=`$PKG_CONFIG --cflags "libjxl" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBJXL_LIBS"; then
+    pkg_cv_LIBJXL_LIBS="$LIBJXL_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libjxl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libjxl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBJXL_LIBS=`$PKG_CONFIG --libs "libjxl" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LIBJXL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libjxl" 2>&1`
+        else
+	        LIBJXL_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libjxl" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LIBJXL_PKG_ERRORS" >&5
+
+	        ac_fn_c_check_header_mongrel "$LINENO" "jxl/decode.h" "ac_cv_header_jxl_decode_h" "$ac_includes_default"
+if test "x$ac_cv_header_jxl_decode_h" = xyes; then :
+
+            have_jxl_hdr=yes
+            LIBJXL_CFLAGS=""
+
+fi
+
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for JxlSignatureCheck in -ljxl" >&5
+$as_echo_n "checking for JxlSignatureCheck in -ljxl... " >&6; }
+if ${ac_cv_lib_jxl_JxlSignatureCheck+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ljxl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char JxlSignatureCheck ();
+int
+main ()
+{
+return JxlSignatureCheck ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_jxl_JxlSignatureCheck=yes
+else
+  ac_cv_lib_jxl_JxlSignatureCheck=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_jxl_JxlSignatureCheck" >&5
+$as_echo "$ac_cv_lib_jxl_JxlSignatureCheck" >&6; }
+if test "x$ac_cv_lib_jxl_JxlSignatureCheck" = xyes; then :
+
+            have_jxl_lib=yes
+            LIBJXL_LIBS="-ljxl"
+
+fi
+
+
+elif test $pkg_failed = untried; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	        ac_fn_c_check_header_mongrel "$LINENO" "jxl/decode.h" "ac_cv_header_jxl_decode_h" "$ac_includes_default"
+if test "x$ac_cv_header_jxl_decode_h" = xyes; then :
+
+            have_jxl_hdr=yes
+            LIBJXL_CFLAGS=""
+
+fi
+
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for JxlSignatureCheck in -ljxl" >&5
+$as_echo_n "checking for JxlSignatureCheck in -ljxl... " >&6; }
+if ${ac_cv_lib_jxl_JxlSignatureCheck+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ljxl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char JxlSignatureCheck ();
+int
+main ()
+{
+return JxlSignatureCheck ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_jxl_JxlSignatureCheck=yes
+else
+  ac_cv_lib_jxl_JxlSignatureCheck=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_jxl_JxlSignatureCheck" >&5
+$as_echo "$ac_cv_lib_jxl_JxlSignatureCheck" >&6; }
+if test "x$ac_cv_lib_jxl_JxlSignatureCheck" = xyes; then :
+
+            have_jxl_lib=yes
+            LIBJXL_LIBS="-ljxl"
+
+fi
+
+
+else
+	LIBJXL_CFLAGS=$pkg_cv_LIBJXL_CFLAGS
+	LIBJXL_LIBS=$pkg_cv_LIBJXL_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	        have_jxl_hdr=yes
+        have_jxl_lib=yes
+        have_jxl_pc=yes
+
+fi
+    if test x$have_jxl_hdr = xyes -a x$have_jxl_lib = xyes; then
+        if test x$enable_jxl = xyes; then
+            $as_echo "#define LOAD_JXL 1" >>confdefs.h
 
         fi
 
         case "$host" in
             *-*-darwin*)
-                jpg_lib=`find_lib libjpeg.dylib`
+                jxl_lib=`find_lib libjxl.dylib`
                 ;;
             *-*-cygwin* | *-*-mingw*)
-                jpg_lib=`find_lib "libjpeg*.dll"`
+                jxl_lib=`find_lib "libjxl*.dll"`
                 ;;
             *)
-                jpg_lib=`find_lib "libjpeg[0-9]*.so.*"`
-                if test x$jpg_lib = x; then
-                    jpg_lib=`find_lib "libjpeg.so.*"`
+                jxl_lib=`find_lib "libjxl[0-9]*.so.*"`
+                if test x$jxl_lib = x; then
+                    jxl_lib=`find_lib "libjxl.so.*"`
                 fi
                 ;;
         esac
-    elif test x$enable_jpg = xyes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *** Unable to find JPEG library (http://www.ijg.org/)" >&5
-$as_echo "$as_me: WARNING: *** Unable to find JPEG library (http://www.ijg.org/)" >&2;}
-        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: JPG image loading disabled" >&5
-$as_echo "$as_me: WARNING: JPG image loading disabled" >&2;}
+    elif test x$enable_jxl = xyes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *** Unable to find JXL library (https://jpegxl.info/)" >&5
+$as_echo "$as_me: WARNING: *** Unable to find JXL library (https://jpegxl.info/)" >&2;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: JXL image loading disabled" >&5
+$as_echo "$as_me: WARNING: JXL image loading disabled" >&2;}
     fi
 fi
 
-if test x$enable_png = xyes -a x$enable_imageio != xyes; then
+if test x$enable_png = xyes; then
+    if test x$enable_stb_image = xyes; then
+        $as_echo "#define LOAD_PNG 1" >>confdefs.h
+
+    elif test x$enable_imageio = xyes; then
+        $as_echo "#define LOAD_PNG 1" >>confdefs.h
+
+        $as_echo "#define PNG_USES_IMAGEIO 1" >>confdefs.h
+
+    else
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libpng" >&5
@@ -13504,16 +14043,16 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$LIBPNG_PKG_ERRORS" >&5
 
-	        ac_fn_c_check_header_mongrel "$LINENO" "png.h" "ac_cv_header_png_h" "$ac_includes_default"
+	            ac_fn_c_check_header_mongrel "$LINENO" "png.h" "ac_cv_header_png_h" "$ac_includes_default"
 if test "x$ac_cv_header_png_h" = xyes; then :
 
-            have_png_hdr=yes
-            LIBPNG_CFLAGS=""
+                have_png_hdr=yes
+                LIBPNG_CFLAGS=""
 
 fi
 
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for png_create_read_struct in -lpng" >&5
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for png_create_read_struct in -lpng" >&5
 $as_echo_n "checking for png_create_read_struct in -lpng... " >&6; }
 if ${ac_cv_lib_png_png_create_read_struct+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -13551,8 +14090,8 @@ fi
 $as_echo "$ac_cv_lib_png_png_create_read_struct" >&6; }
 if test "x$ac_cv_lib_png_png_create_read_struct" = xyes; then :
 
-            have_png_lib=yes
-            LIBPNG_LIBS="-lpng -lz"
+                have_png_lib=yes
+                LIBPNG_LIBS="-lpng -lz"
 
 fi
 
@@ -13560,16 +14099,16 @@ fi
 elif test $pkg_failed = untried; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	        ac_fn_c_check_header_mongrel "$LINENO" "png.h" "ac_cv_header_png_h" "$ac_includes_default"
+	            ac_fn_c_check_header_mongrel "$LINENO" "png.h" "ac_cv_header_png_h" "$ac_includes_default"
 if test "x$ac_cv_header_png_h" = xyes; then :
 
-            have_png_hdr=yes
-            LIBPNG_CFLAGS=""
+                have_png_hdr=yes
+                LIBPNG_CFLAGS=""
 
 fi
 
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for png_create_read_struct in -lpng" >&5
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for png_create_read_struct in -lpng" >&5
 $as_echo_n "checking for png_create_read_struct in -lpng... " >&6; }
 if ${ac_cv_lib_png_png_create_read_struct+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -13607,8 +14146,8 @@ fi
 $as_echo "$ac_cv_lib_png_png_create_read_struct" >&6; }
 if test "x$ac_cv_lib_png_png_create_read_struct" = xyes; then :
 
-            have_png_lib=yes
-            LIBPNG_LIBS="-lpng -lz"
+                have_png_lib=yes
+                LIBPNG_LIBS="-lpng -lz"
 
 fi
 
@@ -13618,34 +14157,35 @@ else
 	LIBPNG_LIBS=$pkg_cv_LIBPNG_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	        have_png_hdr=yes
-        have_png_lib=yes
-        have_png_pc=yes
+	            have_png_hdr=yes
+            have_png_lib=yes
+            have_png_pc=yes
 
 fi
-    if test x$have_png_hdr = xyes -a x$have_png_lib = xyes; then
-        $as_echo "#define LOAD_PNG 1" >>confdefs.h
+        if test x$have_png_hdr = xyes -a x$have_png_lib = xyes; then
+            $as_echo "#define LOAD_PNG 1" >>confdefs.h
 
 
-        case "$host" in
-            *-*-darwin*)
-                png_lib=`find_lib libpng.dylib`
-                ;;
-            *-*-cygwin* | *-*-mingw*)
-                png_lib=`find_lib "libpng*.dll"`
-                ;;
-            *)
-                png_lib=`find_lib "libpng[0-9]*.so.*"`
-                if test x$png_lib = x; then
-                    png_lib=`find_lib "libpng.so.*"`
-                fi
-                ;;
-        esac
-    else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *** Unable to find PNG library (http://www.libpng.org/pub/png/libpng.html)" >&5
+            case "$host" in
+                *-*-darwin*)
+                    png_lib=`find_lib libpng.dylib`
+                    ;;
+                *-*-cygwin* | *-*-mingw*)
+                    png_lib=`find_lib "libpng*.dll"`
+                    ;;
+                *)
+                    png_lib=`find_lib "libpng[0-9]*.so.*"`
+                    if test x$png_lib = x; then
+                        png_lib=`find_lib "libpng.so.*"`
+                    fi
+                    ;;
+            esac
+        else
+            { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *** Unable to find PNG library (http://www.libpng.org/pub/png/libpng.html)" >&5
 $as_echo "$as_me: WARNING: *** Unable to find PNG library (http://www.libpng.org/pub/png/libpng.html)" >&2;}
-        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: PNG image loading disabled" >&5
+            { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: PNG image loading disabled" >&5
 $as_echo "$as_me: WARNING: PNG image loading disabled" >&2;}
+        fi
     fi
 fi
 
@@ -14141,6 +14681,23 @@ _ACEOF
     fi
 fi
 
+if test x$enable_avif = xyes -a x$have_avif_hdr = xyes -a x$have_avif_lib = xyes; then
+    CFLAGS="$LIBAVIF_CFLAGS $CFLAGS"
+    if test x$enable_avif_shared = xyes && test x$avif_lib != x; then
+        echo "-- dynamic libavif -> $avif_lib"
+        cat >>confdefs.h <<_ACEOF
+#define LOAD_AVIF_DYNAMIC "$avif_lib"
+_ACEOF
+
+    else
+        IMG_LIBS="$LIBAVIF_LIBS $IMG_LIBS"
+        if test x$have_avif_pc = xyes; then
+            PC_REQUIRES="libavif $PC_REQUIRES"
+        else
+            PC_LIBS="$LIBAVIF_LIBS $PC_LIBS"
+        fi
+    fi
+fi
 if test x$enable_tif = xyes -a x$have_tif_hdr = xyes -a x$have_tif_lib = xyes; then
     CFLAGS="$LIBTIFF_CFLAGS $CFLAGS"
     if test x$enable_tif_shared = xyes && test x$tif_lib != x; then
@@ -14179,6 +14736,23 @@ _ACEOF
         fi
     fi
 fi
+if test x$enable_jxl = xyes -a x$have_jxl_hdr = xyes -a x$have_jxl_lib = xyes; then
+    CFLAGS="$LIBJXL_CFLAGS $CFLAGS"
+    if test x$enable_jxl_shared = xyes && test x$jxl_lib != x; then
+        echo "-- dynamic libjxl -> $jxl_lib"
+        cat >>confdefs.h <<_ACEOF
+#define LOAD_JXL_DYNAMIC "$jxl_lib"
+_ACEOF
+
+    else
+        IMG_LIBS="$LIBJXL_LIBS $IMG_LIBS"
+        if test x$have_jxl_pc = xyes; then
+            PC_REQUIRES="libjxl $PC_REQUIRES"
+        else
+            PC_LIBS="$LIBJXL_LIBS $PC_LIBS"
+        fi
+    fi
+fi
 if test x$enable_png = xyes -a x$have_png_hdr = xyes -a x$have_png_lib = xyes; then
     CFLAGS="$LIBPNG_CFLAGS $CFLAGS"
     if test x$enable_png_shared = xyes && test x$png_lib != x; then
@@ -14196,9 +14770,40 @@ _ACEOF
         fi
     fi
 fi
+if test x$enable_save_png = xyes; then
+    $as_echo "#define SDL_IMAGE_SAVE_PNG 1" >>confdefs.h
+
+else
+    $as_echo "#define SDL_IMAGE_SAVE_PNG 0" >>confdefs.h
+
+fi
+if test x$enable_save_jpg = xyes; then
+    $as_echo "#define SDL_IMAGE_SAVE_JPG 1" >>confdefs.h
+
+else
+    $as_echo "#define SDL_IMAGE_SAVE_JPG 0" >>confdefs.h
+
+fi
 
 
 
+
+
+ if test "x$enable_tests" = xyes; then
+  BUILD_TESTS_TRUE=
+  BUILD_TESTS_FALSE='#'
+else
+  BUILD_TESTS_TRUE='#'
+  BUILD_TESTS_FALSE=
+fi
+
+ if test "x$enable_installed_tests" = xyes; then
+  INSTALL_TESTS_TRUE=
+  INSTALL_TESTS_FALSE='#'
+else
+  INSTALL_TESTS_TRUE='#'
+  INSTALL_TESTS_FALSE=
+fi
 
 
 CheckWarnAll
@@ -14208,7 +14813,7 @@ CheckVisibilityHidden
 OBJCFLAGS=$CFLAGS
 
 # Finally create all the generated files
-ac_config_files="$ac_config_files Makefile SDL2_image.spec SDL2_image.pc"
+ac_config_files="$ac_config_files Makefile SDL2_image.spec SDL2_image.pc test/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -14389,6 +14994,14 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_VERSION_RC_TRUE}" && test -z "${USE_VERSION_RC_FALSE}"; then
   as_fn_error $? "conditional \"USE_VERSION_RC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_TESTS_TRUE}" && test -z "${BUILD_TESTS_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_TESTS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${INSTALL_TESTS_TRUE}" && test -z "${INSTALL_TESTS_FALSE}"; then
+  as_fn_error $? "conditional \"INSTALL_TESTS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -15224,6 +15837,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "SDL2_image.spec") CONFIG_FILES="$CONFIG_FILES SDL2_image.spec" ;;
     "SDL2_image.pc") CONFIG_FILES="$CONFIG_FILES SDL2_image.pc" ;;
+    "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

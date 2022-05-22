@@ -58,11 +58,13 @@ static struct {
 } supported[] = {
     /* keep magicless formats first */
     { "TGA", NULL,      IMG_LoadTGA_RW },
+    { "AVIF",IMG_isAVIF,IMG_LoadAVIF_RW },
     { "CUR", IMG_isCUR, IMG_LoadCUR_RW },
     { "ICO", IMG_isICO, IMG_LoadICO_RW },
     { "BMP", IMG_isBMP, IMG_LoadBMP_RW },
     { "GIF", IMG_isGIF, IMG_LoadGIF_RW },
     { "JPG", IMG_isJPG, IMG_LoadJPG_RW },
+    { "JXL", IMG_isJXL, IMG_LoadJXL_RW },
     { "LBM", IMG_isLBM, IMG_LoadLBM_RW },
     { "PCX", IMG_isPCX, IMG_LoadPCX_RW },
     { "PNG", IMG_isPNG, IMG_LoadPNG_RW },
@@ -93,8 +95,12 @@ const SDL_version *IMG_Linked_Version(void)
     return(&linked_version);
 }
 
+extern int IMG_InitAVIF(void);
+extern void IMG_QuitAVIF(void);
 extern int IMG_InitJPG(void);
 extern void IMG_QuitJPG(void);
+extern int IMG_InitJXL(void);
+extern void IMG_QuitJXL(void);
 extern int IMG_InitPNG(void);
 extern void IMG_QuitPNG(void);
 extern int IMG_InitTIF(void);
@@ -109,9 +115,19 @@ int IMG_Init(int flags)
 {
     int result = 0;
 
+    if (flags & IMG_INIT_AVIF) {
+        if ((initialized & IMG_INIT_AVIF) || IMG_InitAVIF() == 0) {
+            result |= IMG_INIT_AVIF;
+        }
+    }
     if (flags & IMG_INIT_JPG) {
         if ((initialized & IMG_INIT_JPG) || IMG_InitJPG() == 0) {
             result |= IMG_INIT_JPG;
+        }
+    }
+    if (flags & IMG_INIT_JXL) {
+        if ((initialized & IMG_INIT_JXL) || IMG_InitJXL() == 0) {
+            result |= IMG_INIT_JXL;
         }
     }
     if (flags & IMG_INIT_PNG) {
@@ -136,8 +152,14 @@ int IMG_Init(int flags)
 
 void IMG_Quit()
 {
+    if (initialized & IMG_INIT_AVIF) {
+        IMG_QuitAVIF();
+    }
     if (initialized & IMG_INIT_JPG) {
         IMG_QuitJPG();
+    }
+    if (initialized & IMG_INIT_JXL) {
+        IMG_QuitJXL();
     }
     if (initialized & IMG_INIT_PNG) {
         IMG_QuitPNG();

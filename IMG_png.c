@@ -23,13 +23,26 @@
 
 #include "SDL_image.h"
 
+/* We'll have PNG save support by default */
 #if !defined(SDL_IMAGE_SAVE_PNG)
 #  define SDL_IMAGE_SAVE_PNG 1
 #endif
 
-#if !(defined(__APPLE__) || defined(SDL_IMAGE_USE_WIC_BACKEND)) || defined(SDL_IMAGE_USE_COMMON_BACKEND)
+#if defined(USE_STBIMAGE)
+#undef WANT_LIBPNG
+#elif defined(SDL_IMAGE_USE_COMMON_BACKEND)
+#define WANT_LIBPNG
+#elif defined(SDL_IMAGE_USE_WIC_BACKEND)
+#undef WANT_LIBPNG
+#elif defined(__APPLE__) && defined(PNG_USES_IMAGEIO)
+#undef WANT_LIBPNG
+#else
+#define WANT_LIBPNG
+#endif
 
 #ifdef LOAD_PNG
+
+#ifdef WANT_LIBPNG
 
 #define USE_LIBPNG
 
@@ -449,6 +462,55 @@ done:   /* Clean up and return */
     return(surface);
 }
 
+#elif defined(USE_STBIMAGE)
+
+extern SDL_Surface *IMG_LoadSTB_RW(SDL_RWops *src);
+
+int IMG_InitPNG()
+{
+    /* Nothing to load */
+    return 0;
+}
+
+void IMG_QuitPNG()
+{
+    /* Nothing to unload */
+}
+
+/* FIXME: This is a copypaste from LIBPNG! Pull that out of the ifdefs */
+/* See if an image is contained in a data source */
+int IMG_isPNG(SDL_RWops *src)
+{
+    Sint64 start;
+    int is_PNG;
+    Uint8 magic[4];
+
+    if ( !src ) {
+        return 0;
+    }
+
+    start = SDL_RWtell(src);
+    is_PNG = 0;
+    if ( SDL_RWread(src, magic, 1, sizeof(magic)) == sizeof(magic) ) {
+        if ( magic[0] == 0x89 &&
+             magic[1] == 'P' &&
+             magic[2] == 'N' &&
+             magic[3] == 'G' ) {
+            is_PNG = 1;
+        }
+    }
+    SDL_RWseek(src, start, RW_SEEK_SET);
+    return(is_PNG);
+}
+
+/* Load a PNG type image from an SDL datasource */
+SDL_Surface *IMG_LoadPNG_RW(SDL_RWops *src)
+{
+    return IMG_LoadSTB_RW(src);
+}
+
+#endif /* WANT_LIBPNG */
+
 #else
 #if _MSC_VER >= 1300
 #pragma warning(disable : 4100) /* warning C4100: 'op' : unreferenced formal parameter */
@@ -478,19 +540,7 @@ SDL_Surface *IMG_LoadPNG_RW(SDL_RWops *src)
 
 #endif /* LOAD_PNG */
 
-#endif /* !defined(__APPLE__) || defined(SDL_IMAGE_USE_COMMON_BACKEND) */
-
 #if SDL_IMAGE_SAVE_PNG
-
-int IMG_SavePNG(SDL_Surface *surface, const char *file)
-{
-    SDL_RWops *dst = SDL_RWFromFile(file, "wb");
-    if (dst) {
-        return IMG_SavePNG_RW(surface, dst, 1);
-    } else {
-        return -1;
-    }
-}
 
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
 static const Uint32 png_format = SDL_PIXELFORMAT_ABGR8888;
@@ -630,6 +680,7 @@ static int IMG_SavePNG_RW_libpng(SDL_Surface *surface, SDL_RWops *dst, int freed
 
 #endif /* USE_LIBPNG */
 
+#if defined(LOAD_PNG_DYNAMIC) || !defined(WANT_LIBPNG)
 /* Replace C runtime functions with SDL C runtime functions for building on Windows */
 #define MINIZ_NO_STDIO
 #define MINIZ_NO_TIME
@@ -680,31 +731,38 @@ static int IMG_SavePNG_RW_miniz(SDL_Surface *surface, SDL_RWops *dst, int freeds
     }
     return result;
 }
+#endif /* LOAD_PNG_DYNAMIC || !WANT_LIBPNG */
 
-int IMG_SavePNG_RW(SDL_Surface *surface, SDL_RWops *dst, int freedst)
-{
-    static int (*rw_func)(SDL_Surface *surface, SDL_RWops *dst, int freedst);
+#endif /* SDL_IMAGE_SAVE_PNG */
 
-    if (!rw_func)
-    {
-#ifdef USE_LIBPNG
-        if (IMG_Init(IMG_INIT_PNG)) {
-            rw_func = IMG_SavePNG_RW_libpng;
-        } else
-#endif
-            rw_func = IMG_SavePNG_RW_miniz;
-    }
-
-    return rw_func(surface, dst, freedst);
-}
-#else
 int IMG_SavePNG(SDL_Surface *surface, const char *file)
 {
-    return SDL_Unsupported();
+    SDL_RWops *dst = SDL_RWFromFile(file, "wb");
+    if (dst) {
+        return IMG_SavePNG_RW(surface, dst, 1);
+    } else {
+        return -1;
+    }
 }
 
 int IMG_SavePNG_RW(SDL_Surface *surface, SDL_RWops *dst, int freedst)
 {
-    return SDL_Unsupported();
-}
+#if SDL_IMAGE_SAVE_PNG
+#ifdef USE_LIBPNG
+    if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) != 0) {
+        if (IMG_SavePNG_RW_libpng(surface, dst, freedst) == 0) {
+            return 0;
+        }
+    }
+#endif
+#if defined(LOAD_PNG_DYNAMIC) || !defined(WANT_LIBPNG)
+    return IMG_SavePNG_RW_miniz(surface, dst, freedst);
+#else
+    return -1;
+#endif
+
+#else
+    return IMG_SetError("SDL_image built without PNG save support");
+
 #endif /* SDL_IMAGE_SAVE_PNG */
+}
