@@ -17,30 +17,41 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseC99|Win32">
+      <Configuration>ReleaseC99</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseC99|x64">
+      <Configuration>ReleaseC99</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>SDL2_image</ProjectName>
     <ProjectGuid>{2BD5534E-00E2-4BEA-AC96-D9A92EA24696}</ProjectGuid>
     <RootNamespace>SDL2_image</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+	<ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="UserMacros">
     <RootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)..\..\'))</RootDirectory>
     <ParentOfRoot>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfRoot>
-    <CStandardType>Modern</CStandardType><!--Parts of Code need to be edited to work with ClangToolset on-->
+    <CStandardType>Modern</CStandardType>
+    <!--Parts of Code need to be edited to work with ClangToolset on-->
     <SDLOutputDir Condition="'$(CStandardType)' == 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(ParentOfRoot)TangeriaCoop\src\_SDL2\'))</SDLOutputDir>
     <SDLOutputDir Condition="'$(CStandardType)' != 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(ParentOfRoot)TangeriaCoop\src\_SDL2VC\'))</SDLOutputDir>
   </PropertyGroup>
-  <PropertyGroup>
-    <SDLDir>$([System.IO.Path]::GetFullPath('$(ParentOfRoot)\SDL\'))</SDLDir>
-    <SDLLibrary>$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\SDL2.lib'))</SDLLibrary>
-    <SDLMainLibrary>$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\SDL2main.lib'))</SDLMainLibrary>
-    <SDLImageLibrary>$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\SDL2_image.lib'))</SDLImageLibrary>
-    <SDLMixerLibrary>$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\SDL2_mixer.lib'))</SDLMixerLibrary>
-    <SDLTTFLibrary>$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\SDL2_ttf.lib'))</SDLTTFLibrary>
-    <FreeTypeLibrary>$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\freetype.lib'))</FreeTypeLibrary>
-    <SDLNetLibrary>$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\SDL_net.lib'))</SDLNetLibrary>
+  <PropertyGroup Label="SDLMacros">
+    <SDLDir>$([System.IO.Path]::GetFullPath('$(ParentOfRoot)SDL\'))</SDLDir>
+    <SDLIncludesDir>$([System.IO.Path]::GetFullPath('$(SDLDir)include\'))</SDLIncludesDir>
+    <SDLLibDir>$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\'))</SDLLibDir>
+    <SDLLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)SDL2.lib'))</SDLLibrary>
+    <SDLMainLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)SDL2main.lib'))</SDLMainLibrary>
+    <SDLImageLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)SDL2_image.lib'))</SDLImageLibrary>
+    <SDLMixerLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)SDL2_mixer.lib'))</SDLMixerLibrary>
+    <SDLTTFLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)SDL2_ttf.lib'))</SDLTTFLibrary>
+    <FreeTypeLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)freetype.lib'))</FreeTypeLibrary>
+    <SDLNetLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)SDL_net.lib'))</SDLNetLibrary>
   </PropertyGroup>
   <PropertyGroup Label="ToolsetOptions">
     <!-- 142 for VS2019(Default);143 for VS2022-->
@@ -54,16 +65,19 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
+	<IncludePath>$(SDLIncludesDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SDLLibDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <PropertyGroup Label="OutputInfo">
     <_ProjectFileVersion>10.0.40219.BlazesRus</_ProjectFileVersion>
-    <OutDir>$(SDLOutputDir)$(Platform)\</OutDir>
+    <OutDir>$(SDLLibDir)</OutDir>
     <IntDir>.\ObjectFiles\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
@@ -73,7 +87,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment Condition="'$(Platform)'=='Win32'">Win32</TargetEnvironment>
       <TargetEnvironment Condition="'$(Platform)'=='X64'">X64</TargetEnvironment>
-      <TypeLibraryName>./$(Configuration)/$(Platform)/SDL2_image.tlb</TypeLibraryName>
+      <TypeLibraryName>$(SDLLibDir)SDL2_image.tlb</TypeLibraryName>
       <HeaderFileName>
       </HeaderFileName>
     </Midl>
@@ -100,9 +114,10 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(SDLLibrary);$(SDLMainLibrary);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SDLLibrary);%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
+<!--       <AdditionalLibraryDirectories>$(SDLLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories> -->
     </Link>
     <Bscmake />
   </ItemDefinitionGroup>
@@ -113,7 +128,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment Condition="'$(Platform)'=='Win32'">Win32</TargetEnvironment>
       <TargetEnvironment Condition="'$(Platform)'=='X64'">X64</TargetEnvironment>
-      <TypeLibraryName>./$(Configuration)/$(Platform)/SDL2_image.tlb</TypeLibraryName>
+      <TypeLibraryName>$(SDLLibDir)SDL2_image.tlb</TypeLibraryName>
       <HeaderFileName>
       </HeaderFileName>
     </Midl>
@@ -140,7 +155,8 @@
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>$(SDLLibrary);$(SDLMainLibrary);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SDLLibrary);%(AdditionalDependencies)</AdditionalDependencies>
+<!--       <AdditionalLibraryDirectories>$(SDLLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories> -->
     </Link>
     <Bscmake />
   </ItemDefinitionGroup>
