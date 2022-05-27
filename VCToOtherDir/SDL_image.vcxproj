@@ -35,7 +35,20 @@
   <PropertyGroup Label="UserMacros">
     <RootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)..\..\'))</RootDirectory>
     <ParentOfRoot>$([System.IO.Path]::GetFullPath('$(RootDirectory)\..\'))</ParentOfRoot>
+    <ConfigurationType>Release</ConfigurationType>
   </PropertyGroup>
+  <Choose>
+    <When Condition="'$(Configuration)' == 'Debug'">
+      <PropertyGroup>
+          <ConfigurationType>Debug</ConfigurationType>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+          <ConfigurationType>Release</ConfigurationType>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
   <PropertyGroup>
     <SDLDir>$([System.IO.Path]::GetFullPath('$(ParentOfRoot)\SDL\'))</SDLDir>
     <SDLOutputDir>$([System.IO.Path]::GetFullPath('$(ParentOfRoot)TangeriaCoop\src\_SDL2VC\'))</SDLOutputDir>
@@ -115,7 +128,7 @@
     </Link>
     <Bscmake />
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+  <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='Release'">
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MkTypLibCompatible>true</MkTypLibCompatible>
