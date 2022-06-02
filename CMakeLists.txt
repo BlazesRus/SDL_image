@@ -261,11 +261,19 @@ if(SDL2IMAGE_BUILD_SHARED_LIBS)
             OUTPUT_NAME "SDL2_image-${LT_RELEASE}"
         )
     endif()
+else()
+    if(MSVC OR (WATCOM AND (WIN32 OR OS2)))
+        set_target_properties(SDL2_image PROPERTIES
+            OUTPUT_NAME "SDL2_image-static"
+        )
+    endif()
 endif()
 
-# Use `Compatible Interface Properties` to ensure all linked SDL2 libraries are built with the same "sharedness".
-set_property(TARGET SDL2_image PROPERTY INTERFACE_SDL2_SHARED ${SDL2IMAGE_BUILD_SHARED_LIBS})
-set_property(TARGET SDL2_image APPEND PROPERTY COMPATIBLE_INTERFACE_BOOL SDL2_SHARED)
+# Use `Compatible Interface Properties` to ensure a shared SDL2_image is built with a shared SDL2
+if(SDL2IMAGE_BUILD_SHARED_LIBS)
+    set_property(TARGET SDL2_image PROPERTY INTERFACE_SDL2_SHARED ${SDL2IMAGE_BUILD_SHARED_LIBS})
+    set_property(TARGET SDL2_image APPEND PROPERTY COMPATIBLE_INTERFACE_BOOL SDL2_SHARED)
+endif()
 
 if(SDL2IMAGE_BUILD_SHARED_LIBS)
     sdl_target_link_options_no_undefined(SDL2_image)
@@ -656,8 +664,8 @@ if(SDL2IMAGE_INSTALL)
 
     if(APPLE)
         set(PKG_PREFIX "SDL2_image.framework/Resources")
-    elseif(WIN32)
-        set(PKG_PREFIX "cmake/SDL2_image")
+    elseif(WIN32 AND NOT MINGW)
+        set(PKG_PREFIX "cmake")
     else()
         set(PKG_PREFIX "${CMAKE_INSTALL_LIBDIR}/cmake/SDL2_image")
     endif()
