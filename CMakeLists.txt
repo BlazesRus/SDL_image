@@ -311,12 +311,12 @@ endif()
 if(SDL2IMAGE_ZLIB)
     if(SDL2IMAGE_ZLIB_VENDORED)
         message(STATUS "${PROJECT_NAME}: Using vendored zlib")
-        sdl_check_project_in_subfolder(external/zlib zlib)
-        add_subdirectory(external/zlib EXCLUDE_FROM_ALL)
+        sdl_check_project_in_subfolder(..\zlib-win64\ zlib)
+        add_subdirectory(..\zlib-win64\ EXCLUDE_FROM_ALL)
         # PNG_BUILD_ZLIB variable is used by vendored libpng
         set(PNG_BUILD_ZLIB ON CACHE BOOL "libpng option to tell it should use 'our' vendored ZLIB library" FORCE)
         # ZLIB_INCLUDE_DIR variable is used by vendored libpng
-        set(ZLIB_INCLUDE_DIR "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/zlib;${CMAKE_CURRENT_BINARY_DIR}/external/zlib>" CACHE STRING "path of zlib, passed to libpng" FORCE)
+        set(ZLIB_INCLUDE_DIR "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}..\zlib-win64\;${CMAKE_CURRENT_BINARY_DIR}..\zlib-win64\>" CACHE STRING "path of zlib, passed to libpng" FORCE)
         # ZLIB_LIBRARY variable is used by vendored libpng
         if(SDL2IMAGE_ZLIB_SHARED)
             set(ZLIB_LIBRARY zlib)

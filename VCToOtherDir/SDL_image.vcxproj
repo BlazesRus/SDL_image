@@ -39,12 +39,12 @@
   <Choose>
     <When Condition="'$(Configuration)' == 'Debug'">
       <PropertyGroup>
-          <ConfigurationStyle>Debug</ConfigurationStyle>
+        <ConfigurationStyle>Debug</ConfigurationStyle>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup>
-          <ConfigurationStyle>Release</ConfigurationStyle>
+        <ConfigurationStyle>Release</ConfigurationStyle>
       </PropertyGroup>
     </Otherwise>
   </Choose>
@@ -61,6 +61,21 @@
     <FreeTypeLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)freetype.lib'))</FreeTypeLibrary>
     <SDLNetLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)SDL_net.lib'))</SDLNetLibrary>
   </PropertyGroup>
+  <PropertyGroup>
+    <WinIncludeRoot>$([System.IO.Path]::GetFullPath('$(ParentOfRoot)TangariaCoop\src\win\'))</WinIncludeRoot>
+    <ZPngLibDir Condition="'$(CStandardType)' != 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(WinIncludeRoot)$(Platform)\'))</ZPngLibDir>
+    <ZPngLibDir Condition="'$(CStandardType)' == 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(WinIncludeRoot)Clang$(Platform)\'))</ZPngLibDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ZLibDir>$([System.IO.Path]::GetFullPath('$(ParentOfRoot)\zlib-win64\'))</ZLibDir>
+    <ZLibLibrary>$([System.IO.Path]::GetFullPath('$(ZPngLibDir)zlib.lib'))</ZLibLibrary>
+    <ZLibDLL>$([System.IO.Path]::GetFullPath('$(ZPngLibDir)zlib.dll'))</ZLibDLL>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LibPngDir>$([System.IO.Path]::GetFullPath('$(ParentOfRoot)\libpng\'))</LibPngDir>
+    <LibPngLibrary>$([System.IO.Path]::GetFullPath('$(ZPngLibDir)libpng.lib'))</LibPngLibrary>
+    <LibPngDLL>$([System.IO.Path]::GetFullPath('$(ZPngLibDir)libpng.dll'))</LibPngDLL>
+  </PropertyGroup>
   <PropertyGroup Label="ToolsetOptions">
     <!-- 142 for VS2019(Default);143 for VS2022-->
     <PlatformToolset Condition="'$(Configuration)' == 'ReleaseC99'">ClangCL</PlatformToolset>
@@ -71,8 +86,8 @@
   <PropertyGroup Label="GlobalsPart2">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules/>
-    <CodeAnalysisRuleAssemblies/>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -84,10 +99,16 @@
     <_ProjectFileVersion>10.0.40219.BlazesRus</_ProjectFileVersion>
     <OutDir>$(SDLLibDir)</OutDir>
     <IntDir>$(SDLOutputDir)ObjectFiles\$(ProjectName)\$(Configuration)_$(Platform)\</IntDir>
-    <IncludePath>$(SDLIncludesDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SDLIncludesDir);$(ZLibDir);$(LibPngDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SDLLibDir);$(LibraryPath)</LibraryPath>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+  <ItemDefinitionGroup Condition="'$(ConfigurationStyle)'=='Debug'">
+    <PreBuildEvent>
+      <Command>xcopy  "$(RootDirectory)SDL_image.h" "$(SDLOutputDir)SDL_image.h*" /y /L /D</Command>
+      <Message>Updating SDL Includes in Source of Game</Message>
+    </PreBuildEvent>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MkTypLibCompatible>true</MkTypLibCompatible>
@@ -100,8 +121,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)external\include;$(SDLIncludesDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DLL_EXPORT;_DEBUG;WIN32;_WINDOWS;LOAD_BMP;LOAD_GIF;LOAD_JPG;LOAD_JPG_DYNAMIC="libjpeg-9.dll";LOAD_LBM;LOAD_PCX;LOAD_PNG;LOAD_PNG_DYNAMIC="libpng16-16.dll";LOAD_PNM;LOAD_SVG;LOAD_SVG;LOAD_TGA;LOAD_TIF;LOAD_TIF_DYNAMIC="libtiff-5.dll";LOAD_WEBP;LOAD_WEBP_DYNAMIC="libwebp-7.dll";LOAD_XPM;LOAD_XV;PNG_USE_DLL;ZLIB_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)external\include;$(SDLIncludesDir);$(ZLibDir);$(LibPngDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DLL_EXPORT;_DEBUG;WIN32;_WINDOWS;LOAD_BMP;LOAD_GIF;LOAD_JPG;LOAD_JPG_DYNAMIC="libjpeg-9.dll";LOAD_LBM;LOAD_PCX;LOAD_PNG;LOAD_PNG_DYNAMIC="$(LibPngDLL)";LOAD_PNM;LOAD_SVG;LOAD_SVG;LOAD_TGA;LOAD_TIF;LOAD_TIF_DYNAMIC="libtiff-5.dll";LOAD_WEBP;LOAD_WEBP_DYNAMIC="libwebp-7.dll";LOAD_XPM;LOAD_XV;PNG_USE_DLL;ZLIB_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)' == 'ReleaseC99'">%(PreprocessorDefinitions);UsingClangToolset;</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -121,13 +142,17 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(SDLLibrary);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SDLLibrary);$(ZLibLibrary);$(LibPngLibrary);%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
     </Link>
     <Bscmake />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(ConfigurationStyle)'=='Release'">
+    <PreBuildEvent>
+      <Command>xcopy  "$(RootDirectory)SDL_image.h" "$(SDLOutputDir)SDL_image.h.*" /y /L /D</Command>
+      <Message>Updating SDL Includes in Source of Game</Message>
+    </PreBuildEvent>
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MkTypLibCompatible>true</MkTypLibCompatible>
@@ -139,8 +164,8 @@
       </HeaderFileName>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SDLIncludesDir);$(ProjectDir)external\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DLL_EXPORT;NDEBUG;WIN32;_WINDOWS;LOAD_BMP;LOAD_GIF;LOAD_JPG;LOAD_JPG_DYNAMIC="libjpeg-9.dll";LOAD_LBM;LOAD_PCX;LOAD_PNG;LOAD_PNG_DYNAMIC="libpng16-16.dll";LOAD_PNM;LOAD_SVG;LOAD_TGA;LOAD_TIF;LOAD_TIF_DYNAMIC="libtiff-5.dll";LOAD_WEBP;LOAD_WEBP_DYNAMIC="libwebp-7.dll";LOAD_XPM;LOAD_XV;PNG_USE_DLL;ZLIB_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SDLIncludesDir);$(ProjectDir)external\include;$(ZLibDir);$(LibPngDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DLL_EXPORT;NDEBUG;WIN32;_WINDOWS;LOAD_BMP;LOAD_GIF;LOAD_JPG;LOAD_JPG_DYNAMIC="libjpeg-9.dll";LOAD_LBM;LOAD_PCX;LOAD_PNG;LOAD_PNG_DYNAMIC="$(LibPngDLL)";LOAD_PNM;LOAD_SVG;LOAD_TGA;LOAD_TIF;LOAD_TIF_DYNAMIC="libtiff-5.dll";LOAD_WEBP;LOAD_WEBP_DYNAMIC="libwebp-7.dll";LOAD_XPM;LOAD_XV;PNG_USE_DLL;ZLIB_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)' == 'ReleaseC99'">%(PreprocessorDefinitions);UsingClangToolset;</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -161,7 +186,7 @@
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>$(SDLLibrary);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SDLLibrary);$(ZLibLibrary);$(LibPngLibrary);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake />
   </ItemDefinitionGroup>
