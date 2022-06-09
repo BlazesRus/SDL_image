@@ -53,7 +53,7 @@
     <SDLOutputDir>$([System.IO.Path]::GetFullPath('$(ParentOfRoot)TangariaCoop\src\_SDL2VC\'))</SDLOutputDir>
     <SDLIncludesDir>$([System.IO.Path]::GetFullPath('$(SDLDir)include\'))</SDLIncludesDir>
     <SDLLibDir Condition="'$(Configuration)' != 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)$(Platform)\'))</SDLLibDir>
-    <SDLLibDir Condition="'$(Configuration)' == 'ReleaseC99'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)Clang$(Platform)\'))</SDLLibDir>
+    <SDLLibDir Condition="'$(PlatformToolset)'=='ClangCL'">$([System.IO.Path]::GetFullPath('$(SDLOutputDir)Clang$(Platform)\'))</SDLLibDir>
     <SDLLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)SDL2.lib'))</SDLLibrary>
     <SDLImageLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)SDL2_image.lib'))</SDLImageLibrary>
     <SDLMixerLibrary>$([System.IO.Path]::GetFullPath('$(SDLLibDir)SDL2_mixer.lib'))</SDLMixerLibrary>
@@ -63,8 +63,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <WinIncludeRoot>$([System.IO.Path]::GetFullPath('$(ParentOfRoot)TangariaCoop\src\win\'))</WinIncludeRoot>
-    <ZPngLibDir Condition="'$(CStandardType)' != 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(WinIncludeRoot)$(Platform)\'))</ZPngLibDir>
-    <ZPngLibDir Condition="'$(CStandardType)' == 'ClangToolset'">$([System.IO.Path]::GetFullPath('$(WinIncludeRoot)Clang$(Platform)\'))</ZPngLibDir>
+    <ZPngLibDir Condition="'$(PlatformToolset)'!='ClangCL'">$([System.IO.Path]::GetFullPath('$(WinIncludeRoot)$(Platform)\'))</ZPngLibDir>
+    <ZPngLibDir Condition="'$(PlatformToolset)'=='ClangCL'">$([System.IO.Path]::GetFullPath('$(WinIncludeRoot)Clang$(Platform)\'))</ZPngLibDir>
   </PropertyGroup>
   <PropertyGroup>
     <ZLibDir>$([System.IO.Path]::GetFullPath('$(ParentOfRoot)\zlib-win64\'))</ZLibDir>
@@ -78,9 +78,9 @@
   </PropertyGroup>
   <PropertyGroup Label="ToolsetOptions">
     <!-- 142 for VS2019(Default);143 for VS2022-->
-    <PlatformToolset Condition="'$(Configuration)' == 'ReleaseC99'">ClangCL</PlatformToolset>
-    <PlatformToolset Condition="'$(Configuration)' != 'ReleaseC99' And '$(VisualStudioVersion)' != '17'">v142</PlatformToolset>
-    <PlatformToolset Condition="'$(Configuration)' != 'ReleaseC99' And '$(VisualStudioVersion)' == '17'">v143</PlatformToolset>
+    <PlatformToolset Condition="'$(Configuration)' == 'ReleaseC99' Or '$(Configuration)' == 'DebugC99'">ClangCL</PlatformToolset>
+    <PlatformToolset Condition="'$(PlatformToolset)'!='ClangCL' And '$(VisualStudioVersion)' != '17'">v142</PlatformToolset>
+    <PlatformToolset Condition="'$(PlatformToolset)'!='ClangCL' And '$(VisualStudioVersion)' == '17'">v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="GlobalsPart2">
@@ -123,12 +123,12 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)external\include;$(SDLIncludesDir);$(ZLibDir);$(LibPngDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DLL_EXPORT;_DEBUG;WIN32;_WINDOWS;LOAD_BMP;LOAD_GIF;LOAD_JPG;LOAD_JPG_DYNAMIC="libjpeg-9.dll";LOAD_LBM;LOAD_PCX;LOAD_PNG;LOAD_PNG_DYNAMIC="$(LibPngDLL)";LOAD_PNM;LOAD_SVG;LOAD_SVG;LOAD_TGA;LOAD_TIF;LOAD_TIF_DYNAMIC="libtiff-5.dll";LOAD_WEBP;LOAD_WEBP_DYNAMIC="libwebp-7.dll";LOAD_XPM;LOAD_XV;PNG_USE_DLL;ZLIB_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)' == 'ReleaseC99'">%(PreprocessorDefinitions);UsingClangToolset;</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(PlatformToolset)'=='ClangCL'">%(PreprocessorDefinitions);UsingClangToolset;</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32' Or '$(Configuration)' == 'ReleaseC99'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='X64' And '$(Configuration)' != 'ReleaseC99'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32' Or '$(PlatformToolset)'=='ClangCL'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='X64' And '$(PlatformToolset)'!='ClangCL'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>5105</DisableSpecificWarnings>
@@ -166,11 +166,11 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(SDLIncludesDir);$(ProjectDir)external\include;$(ZLibDir);$(LibPngDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DLL_EXPORT;NDEBUG;WIN32;_WINDOWS;LOAD_BMP;LOAD_GIF;LOAD_JPG;LOAD_JPG_DYNAMIC="libjpeg-9.dll";LOAD_LBM;LOAD_PCX;LOAD_PNG;LOAD_PNG_DYNAMIC="$(LibPngDLL)";LOAD_PNM;LOAD_SVG;LOAD_TGA;LOAD_TIF;LOAD_TIF_DYNAMIC="libtiff-5.dll";LOAD_WEBP;LOAD_WEBP_DYNAMIC="libwebp-7.dll";LOAD_XPM;LOAD_XV;PNG_USE_DLL;ZLIB_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)' == 'ReleaseC99'">%(PreprocessorDefinitions);UsingClangToolset;</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(PlatformToolset)'=='ClangCL'">%(PreprocessorDefinitions);UsingClangToolset;</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32' Or '$(Configuration)' == 'ReleaseC99'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='X64' And '$(Configuration)' != 'ReleaseC99'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32' Or '$(PlatformToolset)'=='ClangCL'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='X64' And '$(PlatformToolset)'!='ClangCL'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <OmitDefaultLibName>false</OmitDefaultLibName>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
